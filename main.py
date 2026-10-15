@@ -1,14 +1,16 @@
 import argparse
 
 from eliminarEpsilon import mostrar_pasos
+from eliminarUnitarias import mostrar_pasos_unitarias
 from gramatica import leer_gramatica
 from variables import mostrar_cuerpo
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Lee una CFG y muestra la eliminación de ε")
+    parser = argparse.ArgumentParser(description="Lee una CFG y elimina ε y producciones unitarias")
     parser.add_argument("archivo", help="archivo de producciones")
-    parser.add_argument("--formato", choices=("auto", "espacios", "compacto"), default="auto")
+    parser.add_argument("--formato", choices=("auto", "espacios", "compacto"), default="auto",
+                        help="auto detecta el formato; una opción explícita prevalece sobre el encabezado")
     args = parser.parse_args()
     try:
         gramatica = leer_gramatica(args.archivo, args.formato)
@@ -17,8 +19,11 @@ def main():
     print(f"Símbolo inicial: {gramatica.inicio}")
     for variable, opciones in gramatica.producciones.items():
         print(f"{variable} → {' | '.join(mostrar_cuerpo(c) for c in sorted(opciones))}")
-    mostrar_pasos(gramatica.inicio, gramatica.producciones)
+    print("\n=== Eliminación de ε (se excluye la cadena vacía) ===")
+    sin_epsilon = mostrar_pasos(gramatica.inicio, gramatica.producciones)
+    mostrar_pasos_unitarias(gramatica.inicio, sin_epsilon)
 
 
 if __name__ == "__main__":
     main()
+
