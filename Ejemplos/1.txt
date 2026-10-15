@@ -1,5 +1,6 @@
+%formato espacios
 E -> T X
-X -> + T X | e
+X -> + T X | ε
 T -> F Y
-Y -> * F Y | e
+Y -> * F Y | ε
 F -> ( E ) | id

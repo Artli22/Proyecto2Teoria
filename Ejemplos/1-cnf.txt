@@ -1,3 +1,4 @@
+%formato espacios
 E -> T X | F Y | L Z | id
 X -> P W | P T
 T -> F Y | L Z | id

@@ -1,3 +1,4 @@
+%formato compacto
 S -> aAa | bBb | ε
 A -> C | a
 B -> C | b
