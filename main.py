@@ -3,12 +3,13 @@ import argparse
 from eliminarEpsilon import mostrar_pasos
 from eliminarUnitarias import mostrar_pasos_unitarias
 from eliminarInutiles import mostrar_pasos_inutiles
+from formaChomsky import mostrar_pasos_chomsky
 from gramatica import leer_gramatica
 from variables import mostrar_cuerpo
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Simplifica una CFG: ε, unitarias y símbolos inútiles")
+    parser = argparse.ArgumentParser(description="Simplifica una CFG y la convierte a Forma Normal de Chomsky sin ε")
     parser.add_argument("archivo", help="archivo de producciones")
     parser.add_argument("--formato", choices=("auto", "espacios", "compacto"), default="auto",
                         help="auto detecta el formato; una opción explícita prevalece sobre el encabezado")
@@ -23,7 +24,8 @@ def main():
     print("\n=== Eliminación de ε (se excluye la cadena vacía) ===")
     sin_epsilon = mostrar_pasos(gramatica.inicio, gramatica.producciones)
     sin_unitarias = mostrar_pasos_unitarias(gramatica.inicio, sin_epsilon)
-    mostrar_pasos_inutiles(gramatica.inicio, sin_unitarias)
+    simplificada = mostrar_pasos_inutiles(gramatica.inicio, sin_unitarias)
+    mostrar_pasos_chomsky(gramatica.inicio, simplificada)
 
 
 if __name__ == "__main__":

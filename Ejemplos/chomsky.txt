@@ -1,0 +1,4 @@
+%formato espacios
+S -> a B c D
+B -> b
+D -> d
