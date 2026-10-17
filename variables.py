@@ -2,6 +2,34 @@ import re
 
 EPSILON = "ε"
 ENCABEZADO = re.compile(r"\s*([A-Z][A-Za-z0-9_]*)\s*(?:→|->|::=)\s*(.*?)\s*")
+# Indicadores de archivo: el primero marca una gramática y el segundo una cadena w
+TIPOS_ARCHIVO = {"%formato": "gramatica", "%cadena": "cadena"}
+
+
+def es_produccion(linea):
+    return ENCABEZADO.fullmatch(linea) is not None
+
+
+def leer_archivo(ruta):
+    """Devuelve (tipo, formato) del encabezado % (o None) y las líneas no vacías numeradas."""
+    encabezado = None
+    lineas = []
+    with open(ruta, encoding="utf-8-sig") as archivo:
+        for numero, linea in enumerate(archivo, start=1):
+            linea = linea.strip()
+            if not linea:
+                continue
+            if linea.startswith("%"):
+                partes = linea.split()
+                if len(partes) != 2 or partes[0] not in TIPOS_ARCHIVO or partes[1] not in {"espacios", "compacto"}:
+                    raise ValueError(f"{ruta}, línea {numero}: use %formato espacios|compacto (gramática) "
+                                     "o %cadena espacios|compacto (cadena)")
+                if encabezado is not None or lineas:
+                    raise ValueError(f"{ruta}, línea {numero}: el encabezado debe aparecer una sola vez, antes del contenido")
+                encabezado = (TIPOS_ARCHIVO[partes[0]], partes[1])
+            else:
+                lineas.append((numero, linea))
+    return encabezado, lineas
 
 
 def analizar_linea(linea, formato="espacios"):

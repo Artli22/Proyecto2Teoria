@@ -1,0 +1,2 @@
+%cadena compacto
+0110

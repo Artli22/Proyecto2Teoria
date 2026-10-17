@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from variables import analizar_linea
+from variables import analizar_linea, es_produccion, leer_archivo
 
 
 @dataclass
@@ -36,23 +36,14 @@ def leer_gramatica(ruta, formato="auto"):
     if formato not in {"auto", "espacios", "compacto"}:
         raise ValueError("formato desconocido; use auto, espacios o compacto")
     ruta = Path(ruta)
-    lineas = []
-    encabezado = None
-    with ruta.open(encoding="utf-8-sig") as archivo:
-        for numero, linea in enumerate(archivo, start=1):
-            linea = linea.strip()
-            if not linea:
-                continue
-            if linea.startswith("%"):
-                partes = linea.split()
-                if len(partes) != 2 or partes[0] != "%formato" or partes[1] not in {"espacios", "compacto"}:
-                    raise ValueError(f"{ruta}, línea {numero}: use %formato espacios o %formato compacto")
-                if encabezado is not None or lineas:
-                    raise ValueError(f"{ruta}, línea {numero}: el encabezado debe aparecer una sola vez, antes de las producciones")
-                encabezado = partes[1]
-            else:
-                lineas.append((numero, linea))
-    elegido = formato if formato != "auto" else encabezado
+    encabezado, lineas = leer_archivo(ruta)
+    # Detecta un archivo de cadena en el lugar de la gramática, por encabezado o por contenido
+    if encabezado and encabezado[0] == "cadena":
+        raise ValueError(f"{ruta}: es un archivo de cadena (%cadena); el orden es: gramática y luego cadena")
+    if lineas and not any(es_produccion(linea) for _, linea in lineas):
+        raise ValueError(f"{ruta}: ninguna línea es una producción; ¿es un archivo de cadena? "
+                         "El orden es: gramática y luego cadena")
+    elegido = formato if formato != "auto" else (encabezado[1] if encabezado else None)
     if elegido is not None:
         return _interpretar(ruta, lineas, elegido)
     resultados = []

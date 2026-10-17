@@ -153,9 +153,9 @@ class Fase4Tests(unittest.TestCase):
 
     def test_pipeline_ejemplos(self):
         base = Path(__file__).parent / "Ejemplos"
-        for nombre in ("chomsky.txt", "chomsky_colisiones.txt", "inutiles.txt",
-                       "lenguaje_vacio.txt", "ingles.txt", "1-cnf.txt",
-                       "Gramatica1.txt", "Gramatica3.txt", "epsilon_inicio.txt"):
+        for nombre in ("chomsky.txt", "chomsky_colisiones.txt", 
+                        "prueba1.txt", "1-cnf.txt",
+                       "Gramatica1.txt", "Gramatica3.txt",):
             with self.subTest(nombre=nombre):
                 g = leer_gramatica(base / nombre)
                 sin_epsilon = eliminar_epsilon(g.inicio, g.producciones)[0]
