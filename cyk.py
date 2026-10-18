@@ -6,7 +6,6 @@ from formaChomsky import es_forma_chomsky
 
 @dataclass(frozen=True)
 class ReferenciaCYK:
-    """Una derivación por no terminal y celda: terminal o pareja con corte."""
     terminal: str | None = None
     corte: int | None = None
     izquierda: str | None = None
@@ -30,14 +29,9 @@ class ResultadoCYK:
 
 
 def tokenizar_frase(texto, minusculas=True):
-    """Un token por palabra separada por espacios; no elimina puntuación.
-
-    La conversión a minúsculas es una política de entrada, no parte de CYK.
-    ejecutar_cyk() recibe los tokens exactos y no los normaliza.
-    """
     return tuple((texto.casefold() if minusculas else texto).split())
 
-
+# Indexación rápida de la gramática para CYK: léxicos y binarias.
 def _indexar_gramatica(inicio, producciones):
     if not es_forma_chomsky(inicio, producciones):
         raise ValueError("CYK requiere un inicio declarado y reglas A → terminal o A → B C, sin ε ni unitarias")
@@ -50,9 +44,8 @@ def _indexar_gramatica(inicio, producciones):
             indice.setdefault(clave, []).append(variable)
     return lexicales, binarias
 
-
+# Reconstrucción del árbol de derivación a partir de la tabla CYK.
 def _construir_arbol(inicio, tokens, tabla):
-    """Reconstruye una derivación con las referencias, sin llamadas recursivas."""
     raiz = (0, len(tokens), inicio)
     nodos = {}
     pendientes = [(raiz, False)]
@@ -73,18 +66,8 @@ def _construir_arbol(inicio, tokens, tabla):
             pendientes.extend([(clave, True), (derecha, False), (izquierda, False)])
     return nodos[raiz]
 
-
+# Ejecución del algoritmo CYK sobre la secuencia de tokens y la gramática en Chomsky.
 def ejecutar_cyk(inicio, producciones, tokens):
-    """CYK sobre tokens exactos y gramática en Chomsky, con una derivación.
-
-    tabla[i, j] guarda los no terminales que producen tokens[i:j], con j
-    exclusivo. Se calculan longitudes crecientes y todos sus posibles cortes.
-    Se rechaza la entrada vacía, conforme a la eliminación total de ε.
-
-    El tiempo incluye construir/llenar la tabla y decidir pertenencia. Excluye
-    tokenización, validación/indexación de reglas, simplificación, árbol e I/O.
-    No modifica la gramática ni la secuencia de entrada.
-    """
     if isinstance(tokens, str):
         raise TypeError("pase una secuencia de tokens; para una frase use tokenizar_frase()")
     tokens = tuple(tokens)
@@ -119,14 +102,23 @@ def ejecutar_cyk(inicio, producciones, tokens):
 
 
 def formatear_arbol(arbol):
+    """Dibuja ramas conservando el orden de los hijos, sin recursión."""
     if arbol is None:
         return "   No hay árbol: la entrada no pertenece al lenguaje."
-    lineas = []
-    pendientes = [(arbol, 0)]
+    lineas = ["   " + arbol.simbolo]
+    pendientes = [
+        (hijo, "", i == len(arbol.hijos) - 1)
+        for i, hijo in reversed(list(enumerate(arbol.hijos)))
+    ]
     while pendientes:
-        nodo, profundidad = pendientes.pop()
-        lineas.append("   " + "  " * profundidad + nodo.simbolo)
-        pendientes.extend((hijo, profundidad + 1) for hijo in reversed(nodo.hijos))
+        nodo, prefijo, ultimo = pendientes.pop()
+        rama = "└── " if ultimo else "├── "
+        lineas.append("   " + prefijo + rama + nodo.simbolo)
+        prefijo_hijos = prefijo + ("    " if ultimo else "│   ")
+        pendientes.extend(
+            (hijo, prefijo_hijos, i == len(nodo.hijos) - 1)
+            for i, hijo in reversed(list(enumerate(nodo.hijos)))
+        )
     return "\n".join(lineas)
 
 
@@ -142,7 +134,7 @@ def formatear_tabla(resultado):
             lineas.append(f"   [{i}, {j}) {fragmento!r}: {{{variables}}}")
     return "\n".join(lineas)
 
-
+# Recopilar los pasos y resultados del análisis CYK en terminal 
 def formatear_resultado_cyk(resultado, mostrar_tabla=False):
     frase = " ".join(resultado.tokens) or "(vacía)"
     lineas = [

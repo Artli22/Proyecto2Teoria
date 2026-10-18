@@ -1,13 +1,7 @@
 from variables import mostrar_cuerpo
 
-
+# Verificacion rapida para saber que expresiones si cumplen con Chomsky
 def es_forma_chomsky(inicio, producciones):
-    """Comprueba A → a o A → B C, sin excepción para ε.
-
-    El inicio puede aparecer en cuerpos: es la variante sin ε acordada, válida
-    para CYK. {inicio: set()} representa el lenguaje vacío y también es válida.
-    La clasificación usa las claves de la gramática, no los nombres T/C.
-    """
     if inicio not in producciones:
         return False
     no_terminales = set(producciones)
@@ -18,13 +12,8 @@ def es_forma_chomsky(inicio, producciones):
     )
 
 
+# Conversión a la forma de pasos anteriores a forma normal Chomsky 
 def convertir_chomsky(inicio, producciones):
-    """Recibe reglas sin ε ni unitarias y devuelve (reglas, terminales, pasos).
-
-    terminales mapea cada terminal aislado a su auxiliar Tn. pasos contiene
-    (lado_izquierdo, cuerpo_normalizado, reglas_binarias) por cuerpo largo.
-    Conserva el inicio y no modifica la entrada. No ejecuta fases anteriores.
-    """
     if inicio not in producciones:
         raise ValueError("el símbolo inicial debe estar en producciones")
     no_terminales = set(producciones)
@@ -86,7 +75,7 @@ def convertir_chomsky(inicio, producciones):
             pasos.append((variable, cuerpo, reglas))
     return resultado, terminales, pasos
 
-
+# Recopilacion de los pasos de conversión a la forma normal de Chomsky
 def formatear_pasos_chomsky(inicio, resultado, terminales, pasos):
     terminales_texto = [
         f"   {auxiliar} → {terminal}" for terminal, auxiliar in terminales.items()

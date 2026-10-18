@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from variables import analizar_linea, es_produccion, leer_archivo
+from variables import analizar_linea
+from archivosEntrada import leer_documento
 
 
 @dataclass
@@ -12,8 +13,8 @@ class Gramatica:
     producciones: dict[str, set[tuple[str, ...]]]
 
 
-# Función interna para interpretar la gramática a partir de las líneas del archivo 
 def _interpretar(ruta, lineas, formato):
+    """Valida una interpretación completa, incluidos los símbolos declarados."""
     producciones = {}
     for numero, linea in lineas:
         try:
@@ -30,20 +31,20 @@ def _interpretar(ruta, lineas, formato):
         raise ValueError(f"{ruta}: variables sin producción: {', '.join(sorted(faltantes))}")
     return Gramatica(next(iter(producciones)), no_terminales, usados - no_terminales, producciones)
 
-# Funcion para leer la gramatica 
+
 def leer_gramatica(ruta, formato="auto"):
-    # Funcion de encabezados para evitar ambigüedades 
+    """Usa encabezado o detecta ambas interpretaciones sin adivinar ambigüedades.
+
+    Un formato explícito tiene prioridad sobre %formato. Los encabezados
+    %tipo y %formato deben ser únicos y preceder a las producciones.
+    """
+    if formato == "libre":
+        formato = "espacios"
     if formato not in {"auto", "espacios", "compacto"}:
         raise ValueError("formato desconocido; use auto, espacios o compacto")
     ruta = Path(ruta)
-    encabezado, lineas = leer_archivo(ruta)
-    # Detecta un archivo de cadena en el lugar de la gramática, por encabezado o por contenido
-    if encabezado and encabezado[0] == "cadena":
-        raise ValueError(f"{ruta}: es un archivo de cadena (%cadena); el orden es: gramática y luego cadena")
-    if lineas and not any(es_produccion(linea) for _, linea in lineas):
-        raise ValueError(f"{ruta}: ninguna línea es una producción; ¿es un archivo de cadena? "
-                         "El orden es: gramática y luego cadena")
-    elegido = formato if formato != "auto" else (encabezado[1] if encabezado else None)
+    lineas, encabezado = leer_documento(ruta, "gramatica")
+    elegido = formato if formato != "auto" else encabezado
     if elegido is not None:
         return _interpretar(ruta, lineas, elegido)
     resultados = []
@@ -58,3 +59,4 @@ def leer_gramatica(ruta, formato="auto"):
     if len(resultados) == 1 or resultados[0] == resultados[1]:
         return resultados[0]
     raise ValueError(f"{ruta}: formato ambiguo; agregue %formato espacios o %formato compacto al inicio del archivo")
+

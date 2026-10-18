@@ -1,12 +1,7 @@
 from variables import mostrar_cuerpo
 
-#
+# Verificacion de los simbolos de produccion que realmente genera alguna cadena de terminales
 def encontrar_generadores(producciones):
-    """Punto fijo de no terminales que derivan alguna cadena de terminales.
-
-    La clasificación se basa en las claves, nunca en isupper(). Una regla
-    vacía también es generadora si esta función se usa fuera del flujo sin ε.
-    """
     no_terminales = set(producciones)
     generadores = set()
     pasos = []
@@ -25,9 +20,8 @@ def encontrar_generadores(producciones):
             generadores.add(variable)
             pasos.append((variable, cuerpo))
 
-
+# Eliminacion de simbolos de produccion que no sean generadores 
 def eliminar_no_generadores(inicio, producciones):
-    """Quita reglas con no generadores; conserva {inicio: set()} si L es vacío."""
     if inicio not in producciones:
         raise ValueError("el símbolo inicial debe estar en producciones")
     generadores, pasos = encontrar_generadores(producciones)
@@ -40,9 +34,8 @@ def eliminar_no_generadores(inicio, producciones):
     }
     return resultado, generadores, pasos
 
-
+# Verificacion de los simbolos de produccion si puedan alcanzarse 
 def encontrar_alcanzables(inicio, producciones):
-    """Recorre no terminales alcanzables desde el inicio sobre estas reglas."""
     if inicio not in producciones:
         raise ValueError("el símbolo inicial debe estar en producciones")
     no_terminales = set(producciones)
@@ -57,7 +50,7 @@ def encontrar_alcanzables(inicio, producciones):
                     pendientes.append(simbolo)
     return alcanzables
 
-
+# Eliminacion de simbolos de produccion que no sean alcanzables 
 def eliminar_inalcanzables(inicio, producciones):
     alcanzables = encontrar_alcanzables(inicio, producciones)
     resultado = {
@@ -66,19 +59,13 @@ def eliminar_inalcanzables(inicio, producciones):
     }
     return resultado, alcanzables
 
-
+# Resultado de la eliminación de símbolos no generadores e inalcanzables
 def eliminar_inutiles(inicio, producciones):
-    """Devuelve (resultado, generadores, alcanzables, pasos).
-
-    Siempre elimina primero no generadores y luego inalcanzables. No modifica
-    la entrada ni cambia el inicio. Los metadatos generadores/pasos describen
-    la entrada; alcanzables describe la gramática tras quitar no generadores.
-    """
     productiva, generadores, pasos = eliminar_no_generadores(inicio, producciones)
     resultado, alcanzables = eliminar_inalcanzables(inicio, productiva)
     return resultado, generadores, alcanzables, pasos
 
-
+# Recopilacion de pasos necesarios para asegurar la eliminación de símbolos inútiles
 def formatear_pasos_inutiles(inicio, producciones, resultado, generadores, alcanzables, pasos):
     no_generadores = set(producciones) - generadores
     inalcanzables = generadores - alcanzables

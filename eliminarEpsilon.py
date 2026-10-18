@@ -2,9 +2,8 @@ from itertools import product
 
 from variables import mostrar_cuerpo
 
-
+# Funcion para eliminar producciones ε 
 def encontrar_anulables(producciones):
-    """Calcula los no terminales que pueden generar ε."""
     anulables = set()
     pasos = []
 
@@ -28,13 +27,8 @@ def encontrar_anulables(producciones):
             anulables.add(variable)
             pasos.append((variable, cuerpo))
 
-
+# Conserva el lenguaje original, con excepcion a la cadena vacia acorde a la metodologia mostrada en clase 
 def eliminar_epsilon(inicio, producciones):
-    """Elimina todas las producciones ε sin modificar la entrada.
-
-    Conserva el lenguaje original excepto la cadena vacía.
-    El parámetro inicio se mantiene por compatibilidad con las llamadas.
-    """
     anulables, pasos = encontrar_anulables(producciones)
     resultado = {variable: set() for variable in producciones}
     combinaciones = []
@@ -81,7 +75,7 @@ def eliminar_epsilon(inicio, producciones):
 
     return resultado, anulables, pasos, combinaciones
 
-
+# Resultados impresos en terminal 
 def mostrar_pasos(inicio, producciones):
     resultado, anulables, pasos, combinaciones = eliminar_epsilon(
         inicio,
@@ -108,8 +102,8 @@ def mostrar_pasos(inicio, producciones):
             f"   {variable} → {mostrar_cuerpo(cuerpo)}: "
             f"{len(casos)} caso(s)"
         )
-        print("      Posiciones omitidas | Producción generada | Observación")
-        print("      --------------------+---------------------+----------------")
+        print("      Posiciones omitidas | Producción generada")
+        print("      --------------------+---------------------")
 
         for omitidas, generado in casos:
             posiciones = (
@@ -120,10 +114,7 @@ def mostrar_pasos(inicio, producciones):
 
             nota = "Se descarta ε" if not generado else ""
 
-            print(
-                f"      {posiciones:<20}| "
-                f"{mostrar_cuerpo(generado):<20}| {nota}"
-            )
+            print(f"      {posiciones:<20}| {mostrar_cuerpo(generado)}")
 
     print(f"\n3. Gramática resultante (inicio: {inicio}):")
 
