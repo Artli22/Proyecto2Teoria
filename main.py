@@ -19,7 +19,8 @@ def main():
     entrada = parser.add_mutually_exclusive_group()
     entrada.add_argument("--frase", help="frase entre comillas; si falta, se solicita por consola")
     entrada.add_argument("--solo-gramatica", action="store_true", help="mostrar fases 0 a 4 sin solicitar una frase")
-    parser.add_argument("--tabla", action="store_true", help="mostrar también la tabla CYK")
+    parser.add_argument("--tabla", action="store_true", default=True,
+                        help="compatibilidad: la tabla y su llenado ya se muestran por defecto")
     parser.add_argument("--respetar-mayusculas", action="store_true", help="no convertir la frase a minúsculas")
     args = parser.parse_args()
     if args.cadenas is not None and (args.frase is not None or args.solo_gramatica):

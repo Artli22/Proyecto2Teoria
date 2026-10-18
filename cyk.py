@@ -123,28 +123,69 @@ def formatear_arbol(arbol):
 
 
 def formatear_tabla(resultado):
-    lineas = ["\nTabla CYK: [i, j) corresponde a tokens[i:j]"]
+    lineas = ["\nTabla CYK: filas = longitud; columnas = posición inicial (desde 1)"]
     if not resultado.tokens:
         lineas.append("   Vacía: no hay tokens.")
-    for longitud in range(1, len(resultado.tokens) + 1):
-        for i in range(len(resultado.tokens) - longitud + 1):
-            j = i + longitud
-            variables = ", ".join(sorted(resultado.tabla[i, j]))
-            fragmento = " ".join(resultado.tokens[i:j])
-            lineas.append(f"   [{i}, {j}) {fragmento!r}: {{{variables}}}")
+        return "\n".join(lineas)
+    n = len(resultado.tokens)
+    for i, token in enumerate(resultado.tokens):
+        lineas.append(f"   {i + 1}: {token!r} = [{i}, {i + 1})")
+    celdas = {
+        (i, j): "{" + ", ".join(sorted(celda)) + "}" if celda else "∅"
+        for (i, j), celda in resultado.tabla.items()
+    }
+    anchos = [max(len(str(i + 1)), *(len(celdas[i, j]) for j in range(i + 1, n + 1))) for i in range(n)]
+    def fila(etiqueta, valores):
+        return "   " + etiqueta.rjust(8) + " | " + " | ".join(v.center(a) for v, a in zip(valores, anchos))
+    lineas.extend(["", fila("Longitud", [str(i + 1) for i in range(n)])])
+    lineas.append("   " + "-" * 8 + "-+-" + "-+-".join("-" * a for a in anchos))
+    for longitud in range(n, 0, -1):
+        valores = [celdas[i, i + longitud] if i + longitud <= n else "—" for i in range(n)]
+        lineas.append(fila(str(longitud), valores))
+    lineas.append("   ∅ = conjunto vacío; — = fuera del triángulo.")
     return "\n".join(lineas)
 
 # Recopilar los pasos y resultados del análisis CYK en terminal 
-def formatear_resultado_cyk(resultado, mostrar_tabla=False):
+def formatear_proceso_cyk(resultado):
+    lineas = ["\nProceso de llenado CYK (una justificación por no terminal):"]
+    n = len(resultado.tokens)
+    if not n:
+        return "\n".join(lineas + ["   Entrada vacía: se rechaza según la convención sin ε."])
+    for longitud in range(1, n + 1):
+        lineas.append(f"\n   Longitud {longitud}:")
+        for i in range(n - longitud + 1):
+            j = i + longitud
+            celda = resultado.tabla[i, j]
+            fragmento = " ".join(resultado.tokens[i:j])
+            conjunto = "{" + ", ".join(sorted(celda)) + "}" if celda else "∅"
+            lineas.append(f"      X[{i + 1}, {j}] {fragmento!r} = {conjunto}")
+            if not celda:
+                motivo = "No hay una regla léxica para este token." if longitud == 1 else "Ningún corte y pareja de no terminales produce este fragmento."
+                lineas.append(f"         {motivo}")
+            for variable, referencia in sorted(celda.items()):
+                if referencia.terminal is not None:
+                    lineas.append(f"         {variable} → {referencia.terminal}")
+                else:
+                    k = referencia.corte
+                    b, c = referencia.izquierda, referencia.derecha
+                    lineas.append(f"         Corte k={k}: {b} ∈ X[{i + 1}, {k}], {c} ∈ X[{k + 1}, {j}]; {variable} → {b} {c}")
+    raiz = "{" + ", ".join(sorted(resultado.tabla[0, n])) + "}" if resultado.tabla[0, n] else "∅"
+    relacion = "∈" if resultado.aceptada else "∉"
+    lineas.append(f"\n   Decisión: {resultado.inicio} {relacion} X[1, {n}] = {raiz} → {'SÍ' if resultado.aceptada else 'NO'}")
+    return "\n".join(lineas)
+
+
+# Recopilar los pasos y resultados del análisis CYK en terminal 
+def formatear_resultado_cyk(resultado, mostrar_tabla=True):
     frase = " ".join(resultado.tokens) or "(vacía)"
     lineas = [
         "\n=== Resultado CYK ===",
         f"Frase analizada: {frase}",
         f"Pertenece al lenguaje: {'SÍ' if resultado.aceptada else 'NO'}",
         f"Tiempo CYK (tabla y decisión): {resultado.tiempo_segundos * 1000:.6f} ms",
-        "\nÁrbol de análisis (gramática en Chomsky):",
-        formatear_arbol(resultado.arbol),
     ]
     if mostrar_tabla:
-        lineas.append(formatear_tabla(resultado))
+        lineas.extend([formatear_tabla(resultado), formatear_proceso_cyk(resultado)])
+    lineas.extend(["\nÁrbol de análisis (gramática en Chomsky):", formatear_arbol(resultado.arbol)])
     return "\n".join(lineas)
+
