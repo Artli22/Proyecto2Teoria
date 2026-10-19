@@ -75,35 +75,35 @@ def eliminar_epsilon(inicio, producciones):
 
     return resultado, anulables, pasos, combinaciones
 
-# Resultados impresos en terminal 
-def mostrar_pasos(inicio, producciones):
+# Recopilacion de los pasos de eliminación de ε como texto (reutilizable en CLI y GUI)
+def formatear_pasos_epsilon(inicio, producciones):
     resultado, anulables, pasos, combinaciones = eliminar_epsilon(
         inicio,
         producciones,
     )
 
-    print("\n1. Variables anulables:")
+    lineas = ["\n1. Variables anulables:"]
 
     for variable, cuerpo in pasos:
-        print(
+        lineas.append(
             f"   {variable} es anulable por "
             f"{variable} → {mostrar_cuerpo(cuerpo)}"
         )
 
     if not pasos:
-        print("   Ninguna")
+        lineas.append("   Ninguna")
 
-    print(f"   Conjunto final: {{{', '.join(sorted(anulables))}}}")
+    lineas.append(f"   Conjunto final: {{{', '.join(sorted(anulables))}}}")
 
-    print("\n2. Combinaciones de símbolos anulables:")
+    lineas.append("\n2. Combinaciones de símbolos anulables:")
 
     for variable, cuerpo, casos in combinaciones:
-        print(
+        lineas.append(
             f"   {variable} → {mostrar_cuerpo(cuerpo)}: "
             f"{len(casos)} caso(s)"
         )
-        print("      Posiciones omitidas | Producción generada")
-        print("      --------------------+---------------------")
+        lineas.append("      Posiciones omitidas | Producción generada")
+        lineas.append("      --------------------+---------------------")
 
         for omitidas, generado in casos:
             posiciones = (
@@ -112,17 +112,22 @@ def mostrar_pasos(inicio, producciones):
                 else "Ninguna"
             )
 
-            nota = "Se descarta ε" if not generado else ""
+            lineas.append(f"      {posiciones:<20}| {mostrar_cuerpo(generado)}")
 
-            print(f"      {posiciones:<20}| {mostrar_cuerpo(generado)}")
-
-    print(f"\n3. Gramática resultante (inicio: {inicio}):")
+    lineas.append(f"\n3. Gramática resultante (inicio: {inicio}):")
 
     for variable, alternativas in resultado.items():
         texto = " | ".join(
             mostrar_cuerpo(cuerpo)
             for cuerpo in sorted(alternativas)
         )
-        print(f"   {variable} → {texto or '∅'}")
+        lineas.append(f"   {variable} → {texto or '∅'}")
 
+    return resultado, "\n".join(lineas)
+
+
+# Resultados impresos en terminal
+def mostrar_pasos(inicio, producciones):
+    resultado, texto = formatear_pasos_epsilon(inicio, producciones)
+    print(texto)
     return resultado
