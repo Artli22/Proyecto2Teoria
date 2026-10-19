@@ -15,7 +15,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 from archivosEntrada import leer_cadenas, tokenizar_cadena
-from cyk import ejecutar_cyk, formatear_arbol, formatear_proceso_cyk, formatear_tabla
+from cyk import ejecutar_cyk, formatear_arbol, formatear_proceso_cyk, formatear_tabla, formatear_tabla_piramide
 from eliminarEpsilon import formatear_pasos_epsilon
 from eliminarInutiles import eliminar_inutiles, formatear_pasos_inutiles
 from eliminarUnitarias import eliminar_unitarias, formatear_pasos_unitarias
@@ -352,7 +352,7 @@ class AplicacionCYK(tk.Tk):
             f"Tiempo CYK: {resultado.tiempo_segundos * 1000:.6f} ms",
         ])
         self._escribir(self.texto_tabla, "\n\n".join([
-            resumen, formatear_tabla(resultado), formatear_proceso_cyk(resultado),
+            resumen, formatear_tabla_piramide(resultado), formatear_proceso_cyk(resultado),
         ]))
         self._escribir(self.texto_arbol, "\n\n".join([
             resumen, "Árbol de análisis (gramática en Chomsky):\n" + formatear_arbol(resultado.arbol),

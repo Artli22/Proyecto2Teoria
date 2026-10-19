@@ -145,6 +145,51 @@ def formatear_tabla(resultado):
     lineas.append("   ∅ = conjunto vacío; — = fuera del triángulo.")
     return "\n".join(lineas)
 
+
+def formatear_tabla_piramide(resultado):
+    """Tabla CYK en forma triangular piramidal para mejor interpretación visual."""
+    lineas = ["\n=== Tabla CYK (Forma Piramidal) ==="]
+    n = len(resultado.tokens)
+    if not n:
+        lineas.append("   (entrada vacia)")
+        return "\n".join(lineas)
+    
+    # Encabezado: posiciones y tokens
+    lineas.append("\n   Base (Longitud 1) - Analisis lexico:")
+    lineas.append("   " + " ".join(f"{i:^14}" for i in range(n)))
+    lineas.append("   " + " ".join(f"{t:^14}" for t in resultado.tokens))
+    lineas.append("")
+    
+    # Calcular celdas
+    celdas = {
+        (i, j): "{" + ", ".join(sorted(resultado.tabla[i, j])) + "}" if resultado.tabla[i, j] else "[VACIO]"
+        for (i, j) in resultado.tabla
+    }
+    
+    # Mostrar cada nivel de la pirámide (de longitud 1 a n)
+    for longitud in range(1, n + 1):
+        valores = []
+        for i in range(n - longitud + 1):
+            j = i + longitud
+            celda = celdas[i, j]
+            valores.append(f"{celda:^14}")
+        
+        # Indentación progresiva para forma piramidal
+        espacios_indentacion = " " * (7 * longitud)
+        lineas.append(f"   Lon{longitud} {espacios_indentacion}" + "".join(valores))
+    
+    # Leyenda
+    resultado_aceptacion = "SI [ACEPTADA]" if resultado.aceptada else "NO [RECHAZADA]"
+    lineas.extend([
+        "",
+        "   Leyenda:",
+        "   * {A, B, ...} = variables que derivan esa subcadena",
+        "   * [VACIO] = ninguna variable la deriva",
+        f"   * Resultado: {resultado_aceptacion} ({resultado.inicio} en Lon[{n}])"
+    ])
+    
+    return "\n".join(lineas)
+
 # Recopilar los pasos y resultados del análisis CYK en terminal 
 def formatear_proceso_cyk(resultado):
     lineas = ["\nProceso de llenado CYK (una justificación por no terminal):"]
@@ -176,7 +221,7 @@ def formatear_proceso_cyk(resultado):
 
 
 # Recopilar los pasos y resultados del análisis CYK en terminal 
-def formatear_resultado_cyk(resultado, mostrar_tabla=True):
+def formatear_resultado_cyk(resultado, mostrar_tabla=True, tabla_piramide=True):
     frase = " ".join(resultado.tokens) or "(vacía)"
     lineas = [
         "\n=== Resultado CYK ===",
@@ -185,7 +230,11 @@ def formatear_resultado_cyk(resultado, mostrar_tabla=True):
         f"Tiempo CYK (tabla y decisión): {resultado.tiempo_segundos * 1000:.6f} ms",
     ]
     if mostrar_tabla:
-        lineas.extend([formatear_tabla(resultado), formatear_proceso_cyk(resultado)])
+        if tabla_piramide:
+            lineas.append(formatear_tabla_piramide(resultado))
+        else:
+            lineas.append(formatear_tabla(resultado))
+        lineas.append(formatear_proceso_cyk(resultado))
     lineas.extend(["\nÁrbol de análisis (gramática en Chomsky):", formatear_arbol(resultado.arbol)])
     return "\n".join(lineas)
 
