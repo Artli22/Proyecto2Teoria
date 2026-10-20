@@ -155,3 +155,11 @@ alternativa ().
 
 Los cierres unitarios y el alcance usan visitados para evitar recorridos
 infinitos. Se eliminan no generadores antes de inalcanzables.
+
+## 9. Detalles importantes
+
+- Se utiliza el comando `python interfaz.py` para iniciar el programa con la interfaz gráfica.
+- Se necesita que los archivos de Gramática y Cadena tengan sus respectivos encabezados `%formato espacios`, `%formato compacto`, `%cadena compacta` y `%cadena libre` para ser detectados correctamente por las medidas de seguridad de la interfaz.
+- Las medidas de seguridad prohiben que se suba una gramática en el segmento de cadenas y una cadena en el segmento de gramática; salta un aviso si no se cumplen estas características.
+- Se recomienda utilizar el archivo `prueba1.txt` para la gramática y el archivo `cadena.txt` para verificar casos donde w sí pertenece a la gramática; estos archivos están dentro de la carpeta `Ejemplos/` del proyecto.
+- Se recomienda utilizar el archivo `prueba1.txt` para la gramática y el archivo `cadenas_mixtas.txt` para observar casos donde w no pertenece a la gramática; también están incluidos en la carpeta `Ejemplos/`.
