@@ -163,3 +163,9 @@ infinitos. Se eliminan no generadores antes de inalcanzables.
 - Las medidas de seguridad prohiben que se suba una gramática en el segmento de cadenas y una cadena en el segmento de gramática; salta un aviso si no se cumplen estas características.
 - Se recomienda utilizar el archivo `prueba1.txt` para la gramática y el archivo `cadena.txt` para verificar casos donde w sí pertenece a la gramática; estos archivos están dentro de la carpeta `Ejemplos/` del proyecto.
 - Se recomienda utilizar el archivo `prueba1.txt` para la gramática y el archivo `cadenas_mixtas.txt` para observar casos donde w no pertenece a la gramática; también están incluidos en la carpeta `Ejemplos/`.
+
+## 10. Investigación y toma de decisiones detalladas
+
+El siguiente documento de Word amplía la información presentada en este README sobre la investigación y la toma de decisiones del proyecto. Además, incluye las secciones adicionales requeridas en el documento de instrucciones.
+
+[Consultar el documento de investigación y documentación del proyecto CYK](https://uvggt-my.sharepoint.com/:w:/r/personal/lim24683_uvg_edu_gt/Documents/Investigacion%20y%20documentacion%20proyecto%202%20CYK.docx?d=w178977a787274a0e9b7a2d6d13364d09&csf=1&web=1&e=sylSzX)
